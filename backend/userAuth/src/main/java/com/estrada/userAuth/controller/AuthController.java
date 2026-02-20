@@ -2,64 +2,87 @@ package com.estrada.userAuth.controller;
 
 import com.estrada.userAuth.model.User;
 import com.estrada.userAuth.payload.LoginRequest;
-import com.estrada.userAuth.payload.RegisterRequest;
 import com.estrada.userAuth.repository.UserRepository;
+
+import com.estrada.userAuth.security.JwtUtils;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private AuthenticationManager authenticationManager;
+    @Autowired private JwtUtils jwtUtils;
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    // Register endpoint
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
-
-        if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity.badRequest().body("Username is already taken");
-        }
-
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("Email is already taken");
-        }
-
-        User user = new User();
-        user.setUsername(registerRequest.getUsername());
-        user.setEmail(registerRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-
+    public ResponseEntity<?> register(@RequestBody User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok(Map.of("message", "User registered successfully"));
     }
 
-    // Login endpoint
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request,
+                                   HttpServletResponse response) {
+        try {
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(), request.getPassword()));
 
-        return userRepository.findByUsername(loginRequest.getUsername())
-                .map(user -> {
-                    if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-                        return ResponseEntity.ok("Login successful");
-                    } else {
-                        return ResponseEntity.badRequest().body("Invalid password");
-                    }
-                })
-                .orElse(ResponseEntity.badRequest().body("User not found"));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            String token = jwtUtils.generateToken(request.getUsername());
+
+            ResponseCookie cookie = ResponseCookie.from("jwt", token)
+                    .httpOnly(true)
+                    .secure(false)      // true in production
+                    .path("/")
+                    .maxAge(86400)
+                    .sameSite("Strict")
+                    .build();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            return ResponseEntity.ok(Map.of("message", "Login successful"));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
+        }
     }
 
-    // Protected profile endpoint
-    @GetMapping("/me")
-    public ResponseEntity<?> getProfile() {
-        // For now, we return a placeholder
-        return ResponseEntity.ok("This is a protected route (to be implemented with JWT)");
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok(Map.of("message", "Logged out"));
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> profile(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        return ResponseEntity.ok(Map.of("username", user.getUsername(), "email", user.getEmail()));
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> test() {
+        return ResponseEntity.ok(Map.of("message", "backend is reachable"));
     }
 }
