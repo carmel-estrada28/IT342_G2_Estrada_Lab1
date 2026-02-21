@@ -11,15 +11,18 @@
 - JWT/session authentication setup - commit: 3a85e682f01479dea996df8d8526f036abf1dc7f
 - Cookie-based JWT working - commit: 3a85e682f01479dea996df8d8526f036abf1dc7f
 - Backend tested and verified
+- Initial Frontend Register Page - commit: 4e5598815a8d5978989ed2752f2191c7b21223ae
+- Initial Frontend Login Page - commit: 4e5598815a8d5978989ed2752f2191c7b21223ae
+- Web folder properly added in main repository
 
 ## IN-PROGRESS
-- Frontend development (ReactJS)
-- Login UI
+- More Refined Login UI
+- More Refined Register UI
 
 ## TODO
-- Register UI
 - Profile UI
 - Dashboard UI
+- Logout UI / functionality
 - Mobile
 - Web UI screenshots in FRS
  
