@@ -18,11 +18,12 @@
 ## IN-PROGRESS
 - More Refined Login UI
 - More Refined Register UI
+- Mobile Setup
 
 ## TODO
 - Profile UI
 - Dashboard UI
 - Logout UI / functionality
 - Mobile
-- Web UI screenshots in FRS
+- Web & Mobile UI screenshots in FRS
  

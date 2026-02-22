@@ -67,6 +67,8 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
                 .path("/")
                 .maxAge(0)
                 .build();
