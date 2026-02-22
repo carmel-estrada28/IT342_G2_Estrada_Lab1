@@ -14,16 +14,17 @@
 - Initial Frontend Register Page - commit: 4e5598815a8d5978989ed2752f2191c7b21223ae
 - Initial Frontend Login Page - commit: 4e5598815a8d5978989ed2752f2191c7b21223ae
 - Web folder properly added in main repository
+- Mobile Setup - commit: e217228f425a3feafd3b5a628a27190cd71ba15c
+- Web & Mobile UI screenshots in FRS
 
 ## IN-PROGRESS
-- More Refined Login UI
-- More Refined Register UI
-- Mobile Setup
+
+
 
 ## TODO
 - Profile UI
-- Dashboard UI
-- Logout UI / functionality
-- Mobile
-- Web & Mobile UI screenshots in FRS
+- More Refined Login UI (in both Web and Mobile)
+- More Refined Register UI (in both Web and Mobile)
+- More Refined Dashboard UI (in both Web and Mobile)
+
  
