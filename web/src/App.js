@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 
 export default function App() {
     const [page, setPage] = useState('login');
@@ -19,10 +20,9 @@ export default function App() {
                 />
             )}
             {page === 'dashboard' && (
-                <div style={{ padding: '2rem' }}>
-                    <h2>Dashboard coming soon...</h2>
-                    <button onClick={() => setPage('login')}>Logout</button>
-                </div>
+                <Dashboard
+                    onLogout={() => setPage('login')}
+                />
             )}
         </div>
     );
